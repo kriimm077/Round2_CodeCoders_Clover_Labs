@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BrandLens - brand governance before you publish</title>
+<style>
+:root{--g:#1F6F5C;--y:#F4B942;--bg:#F5F1E8;--ink:#1A1A1A;--mut:#5c5c5c;--card:#fff;--line:#ddd6c6;--red:#b3261e;--amb:#8a5a00}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--g);color:#fff;padding:10px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+header b{font-size:18px}header a{color:#fff;text-decoration:none;opacity:.9;padding:4px 8px;border-radius:6px}header a:hover,header a.on{background:rgba(255,255,255,.18)}
+header .sp{flex:1}.main{max-width:1180px;margin:0 auto;padding:18px}
+.ai{background:#fff8e1;border-bottom:1px solid #ecd9a0;padding:6px 20px;font-size:13px;color:#5a4500}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:20px}h3{margin:0 0 8px;font-size:16px}
+button,.btn{background:var(--g);color:#fff;border:0;border-radius:7px;padding:7px 13px;font:inherit;cursor:pointer}
+button.alt{background:#fff;color:var(--g);border:1px solid var(--g)}button.red{background:var(--red)}button.sm{padding:3px 9px;font-size:13px}button:disabled{opacity:.5}
+input,select,textarea{font:inherit;padding:7px 9px;border:1px solid #bbb;border-radius:7px;width:100%;background:#fff}textarea{min-height:150px}
+label{display:block;font-weight:600;margin:10px 0 3px;font-size:13px}.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:200px}
+table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:12px;color:var(--mut);text-transform:uppercase}
+tr.click:hover{background:#faf7ef;cursor:pointer}
+.chip{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;background:#e8e2d2}
+.s-Draft{background:#e8e2d2}.s-In\ Review{background:#dbe9ff;color:#0b3d91}.s-Changes\ Requested{background:#ffe3d6;color:#8a3200}.s-Approved{background:#d6f2dc;color:#0b5b21}
+.sev-high{background:#fde0de;color:var(--red)}.sev-medium{background:#fff0cc;color:var(--amb)}.sev-low{background:#e3eef9;color:#1b4f87}
+.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:16px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.doc{white-space:pre-wrap;background:#fffdf7;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:15px;max-height:420px;overflow:auto}
+mark{background:#ffe08a;border-radius:3px;padding:0 1px;cursor:pointer}mark.d{background:#d8eadf}mark.hl{outline:2px solid var(--g)}
+.f{border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:10px;background:#fff}.f.done{opacity:.78;background:#f7f7f2}
+.src{font-size:13px;background:#f1f6f4;border-left:3px solid var(--g);padding:6px 9px;margin:6px 0;color:#244}
+.sug{background:#eef7f0;padding:5px 8px;border-radius:6px;margin:6px 0;font-size:14px}del{background:#fde0de}ins{background:#d6f2dc;text-decoration:none}
+.mut{color:var(--mut);font-size:13px}.bar{height:12px;background:var(--g);border-radius:4px;min-width:3px}.login{max-width:430px;margin:40px auto}
+dialog{border:0;border-radius:12px;padding:18px;width:min(560px,92vw)}dialog::backdrop{background:rgba(0,0,0,.4)}
+.err{background:#fde0de;color:var(--red);padding:8px 12px;border-radius:8px;margin-bottom:10px}.ok{background:#d6f2dc;padding:8px 12px;border-radius:8px;margin-bottom:10px}
+.tabs button{margin-right:6px}.warn{background:#fff0cc;padding:2px 8px;border-radius:6px;font-size:12px}
+:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+</style></head><body>
+<header id="hd"></header><div class="ai" id="ai"></div><div class="main" id="app"></div>
+<dialog id="dlg"><form method="dialog"><h3 id="dt"></h3><div id="db"></div><div style="margin-top:12px;text-align:right"><button class="alt" value="no" id="dno" type="button">Cancel</button> <button value="yes" id="dyes">OK</button></div></form></dialog>
+<script>
+const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={token:localStorage.getItem('bl_token'),user:null,disc:null,msg:''};
+async function api(path,opt={}){const h={'Content-Type':'application/json'};if(S.token)h.Authorization='Bearer '+S.token;
+ const r=await fetch('/api'+path,{method:opt.method||'GET',headers:opt.form?{Authorization:h.Authorization}:h,body:opt.form?opt.form:(opt.body?JSON.stringify(opt.body):undefined)});
+ if(r.status===401&&path!=='/login'){logout(true);throw new Error('Please log in');}
+ const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||'Something went wrong');return j}
+function ask(title,html,get){return new Promise(res=>{$('#dt').textContent=title;$('#db').innerHTML=html;const d=$('#dlg');
+ $('#dno').onclick=()=>{d.close();res(null)};d.onclose=()=>{};$('#dyes').onclick=e=>{e.preventDefault();const v=get();d.close();res(v)};d.showModal();const f=d.querySelector('input,textarea');f&&f.focus()})}
+function toast(m,bad){S.msg=`<div class="${bad?'err':'ok'}" role="alert">${esc(m)}</div>`;const t=$('#toast');if(t)t.innerHTML=S.msg;setTimeout(()=>{const t=$('#toast');if(t)t.innerHTML=''},5000)}
+function logout(silent){localStorage.removeItem('bl_token');S.token=null;S.user=null;location.hash='#/login';render()}
+async function boot(){S.disc=await api('/disclosure');$('#ai').innerHTML=S.disc.ai_enabled?`AI disclosure: this tool uses rule-based checks plus an external AI service (${esc(S.disc.model)}). Only the submitted text and the brand guidelines are sent to it. AI findings are labelled and must pass citation verification.`:'AI disclosure: this deployment uses transparent rule-based checks only. An optional AI layer (external LLM API) can be switched on by the administrator; if enabled, AI findings are labelled and citation-verified.';
+ if(S.token){try{S.user=await api('/me')}catch(e){S.token=null}}render()}
+window.onhashchange=render;
+function nav(){const u=S.user;if(!u){$('#hd').innerHTML='<b>BrandLens</b>';return}const h=location.hash;const a=(p,t)=>`<a href="#${p}" class="${h===('#'+p)?'on':''}">${t}</a>`;
+ $('#hd').innerHTML=`<b>BrandLens</b>${a('/','Submissions')}${a('/new','New review')}${a('/kb','Brand knowledge')}${u.role!=='creator'?a('/insights','Insights'):''}<span class="sp"></span><span>${esc(u.name)} <span class="chip" style="color:#000">${esc(u.role)}</span></span><button class="alt sm" onclick="logout()">Log out</button>`}
+async function render(){nav();const h=location.hash||'#/';const el=$('#app');
+ try{if(!S.user){return viewLogin(el)}
+ if(h==='#/'||h==='')return await viewList(el);if(h==='#/new')return viewNew(el);if(h==='#/kb')return await viewKB(el);if(h==='#/insights')return await viewInsights(el);
+ const m=h.match(/^#\/s\/(\d+)(?:\/v(\d+))?/);if(m)return await viewSub(el,+m[1],m[2]?+m[2]:null);el.innerHTML='<div class="card">Page not found</div>'}
+ catch(e){el.innerHTML=`<div class="err">${esc(e.message)}</div>`}}
+function viewLogin(el){el.innerHTML=`<div class="card login"><h2>BrandLens</h2><p>Check content against approved brand guidelines <b>before</b> it is published. Pick a demo role to try the full workflow:</p>
+ <div class="row" style="margin:10px 0"><button onclick="doLogin('riya')">Creator (Riya)</button><button onclick="doLogin('manav')">Brand manager (Manav)</button><button onclick="doLogin('sana')">Reviewer (Sana)</button></div>
+ <details><summary class="mut">or log in manually</summary><label>Username</label><input id="lu" value="riya"><label>Password</label><input id="lp" type="password" value="demo123"><p><button onclick="doLogin()">Log in</button></p></details>
+ <p class="mut">Demo brand: BrightBox (fictional healthy-snack subscription). All demo passwords are <code>demo123</code>.</p><div id="toast"></div></div>`}
+async function doLogin(u){try{const r=await api('/login',{method:'POST',body:{username:u||$('#lu').value,password:u?'demo123':$('#lp').value}});S.token=r.token;S.user=r.user;localStorage.setItem('bl_token',r.token);location.hash='#/';render()}catch(e){toast(e.message,1)}}
+const chip=s=>`<span class="chip s-${esc(s)}">${esc(s)}</span>`;
+async function viewList(el){const r=await api('/submissions');el.innerHTML=`<div class="card"><div class="row" style="align-items:center"><h2 style="flex:3">${S.user.role==='creator'?'My content':'All content'}</h2><div style="text-align:right"><a class="btn" href="#/new">+ New review</a></div></div>
+ <table><tr><th>Title</th><th>Channel</th><th>Author</th><th>Status</th><th>Version</th><th>Findings</th></tr>${r.map(s=>`<tr class="click" onclick="location.hash='#/s/${s.id}'"><td><b>${esc(s.title)}</b><div class="mut">${esc(s.purpose)}</div></td><td>${esc(s.channel)}</td><td>${esc(s.author)}</td><td>${chip(s.status)}</td><td>v${s.version}</td><td>${s.open_findings} open / ${s.total_findings}</td></tr>`).join('')||'<tr><td colspan=6>Nothing yet. Start a new review.</td></tr>'}</table></div>
+ <div class="card mut">How it works: 1) submit content and its purpose, 2) get explained findings that cite the approved guideline or fact, 3) accept, edit or dismiss each suggestion, 4) send for human approval.</div>`}
+const SAMPLE={t:'Instagram: Summer Offer',p:'Promote the annual plan to new followers',c:'Social media',x:'Hey guys!! Summer is HERE \u2600\ufe0f Our annual plan saves 25% and we guarantee you will love it. The Starter box costs just \u20b9549 a month. Join the Bright Box family today!',col:'text: #FFFFFF, background: #F4B942'};
+function viewNew(el){el.innerHTML=`<div class="card"><h2>New review</h2><div id="toast"></div><div class="row"><div><label for="nt">Title</label><input id="nt" placeholder="e.g. Instagram: Diwali box"></div><div><label for="nc">Channel</label><select id="nc"><option>Social media</option><option>Email</option><option>Website</option><option>Press release</option><option>Brochure</option></select></div></div>
+ <label for="np">Purpose (what should this content achieve? Suggestions will try to preserve it)</label><input id="np" placeholder="e.g. Announce the festive box to existing members">
+ <label for="nx">Content (paste text, or upload .txt / .docx / .pdf)</label><textarea id="nx" placeholder="Paste your draft here. Markdown images and links are checked for accessibility."></textarea>
+ <div class="row"><div><input type="file" id="nf" accept=".txt,.md,.docx,.pdf" aria-label="Upload content file"></div><div><label for="ncol" style="margin-top:0">Design colours used (optional: text colour then background colour as hex)</label><input id="ncol" placeholder="text: #777777, background: #FFFFFF"></div></div>
+ <p><button onclick="submitNew()" id="nb">Run review</button> <button class="alt" onclick="fillSample()">Load sample content</button></p></div>`;
+ $('#nf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const fd=new FormData();fd.append('file',f);try{const r=await api('/extract',{method:'POST',form:fd});$('#nx').value=r.text;if(!$('#nt').value)$('#nt').value=f.name.replace(/\.[^.]+$/,'');toast('Text extracted from '+r.filename)}catch(err){toast(err.message,1)}}}
+function fillSample(){$('#nt').value=SAMPLE.t;$('#np').value=SAMPLE.p;$('#nc').value=SAMPLE.c;$('#nx').value=SAMPLE.x;$('#ncol').value=SAMPLE.col}
+async function submitNew(){const b=$('#nb');b.disabled=true;b.textContent='Reviewing...';try{const r=await api('/submissions',{method:'POST',body:{title:$('#nt').value,purpose:$('#np').value,channel:$('#nc').value,text:$('#nx').value,colors:$('#ncol').value}});location.hash='#/s/'+r.id}catch(e){toast(e.message,1);b.disabled=false;b.textContent='Run review'}}
+function hiliteText(text,fs){const ok=fs.filter(f=>f.start>=0).sort((a,b)=>a.start-b.start);let out='',pos=0;for(const f of ok){if(f.start<pos)continue;out+=esc(text.slice(pos,f.start))+`<mark id="m${f.id}" class="${f.status==='open'?'':'d'}" onclick="focusF(${f.id})" title="${esc(f.category)}">${esc(text.slice(f.start,f.end)||'\u2423')}</mark>`;pos=f.end}return out+esc(text.slice(pos))}
+function focusF(id){const e=document.getElementById('f'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.style.boxShadow='0 0 0 3px #F4B942';setTimeout(()=>e.style.boxShadow='',1500)}}
+function findingCard(f,canAct){const done=f.status!=='open';const st={accepted:'Accepted',edited:'Edited by you',dismissed:'Dismissed'}[f.status];
+ const sg=f.start>=0?(f.suggestion?`<div class="sug"><b>Suggested:</b> <del>${esc(f.original)||'\u2423'}</del> &rarr; <ins>${esc(f.suggestion)}</ins></div>`:'<div class="sug mut">No automatic suggestion: needs your own wording (human judgement).</div>'):`<div class="sug"><b>Suggestion:</b> ${esc(f.suggestion||'Review your design file')} <span class="mut">(design setting, change it outside this text)</span></div>`;
+ return `<div class="f ${done?'done':''}" id="f${f.id}"><div><span class="chip sev-${f.severity}">${f.severity}</span> <span class="chip">${esc(f.category)}</span> ${f.origin==='ai'?'<span class="chip" style="background:#efe3ff">AI finding (verified)</span>':'<span class="chip">Rule check</span>'} <span class="mut">confidence ${Math.round(f.confidence*100)}%</span>${f.confidence<0.7?' <span class="warn">needs human judgement</span>':''}</div>
+ <p style="margin:6px 0"><b>${esc(f.explanation)}</b></p>${f.original?`<div class="mut">Found: &ldquo;${esc(f.original)}&rdquo;</div>`:''}
+ <div class="src"><b>Why: ${esc(f.source_ref)} &middot; ${esc(f.source_title)}</b><br>${esc(f.source_text)}</div>${sg}
+ ${done?`<div><span class="chip">${st}</span> ${f.status==='edited'?'&rarr; '+esc(f.decision_text):''} ${f.reason?'<span class="mut">Reason: '+esc(f.reason)+'</span>':''} ${canAct?`<button class="alt sm" onclick="decide(${f.id},'reopen')">Undo</button>`:''}</div>`:
+ (canAct?`<div><button class="sm" onclick="decide(${f.id},'accept')" ${f.rule==='longsent'?'disabled title="No suggestion to accept. Use Edit or Dismiss"':''}>Accept</button> <button class="alt sm" onclick="decideEdit(${f.id},'${esc(f.suggestion).replace(/'/g,'&#39;')}')">Edit</button> <button class="alt sm" onclick="decideDismiss(${f.id})">Dismiss</button></div>`:'<span class="mut">Waiting for the author&rsquo;s decision</span>')}</div>`}
+let CUR=null;
+async function viewSub(el,id,ver){const d=await api('/submissions/'+id+(ver?'?version='+ver:''));CUR=d;const s=d.submission,v=d.version,u=S.user;const latest=v.n===d.latest;const own=s.author_id===u.id;const canAct=own&&latest&&s.status!=='Approved';
+ const open=d.findings.filter(f=>f.status==='open').length;
+ let actions='';if(own&&latest){if(['Draft','Changes Requested'].includes(s.status))actions+=`<button onclick="doSubmit()">Submit for review</button> `;
+  actions+=`<button class="alt" onclick="doApply()">Apply my accepted changes as a new version</button> <button class="alt" onclick="doEdit()">Edit text and re-review</button>`}
+ if(['manager','reviewer'].includes(u.role)&&!own&&s.status==='In Review')actions+=`<button onclick="doDecision('approve')">Approve</button> <button class="red" onclick="doDecision('request_changes')">Request changes</button>`;
+ el.innerHTML=`<div id="toast"></div><div class="card"><div class="row" style="align-items:center"><div style="flex:3"><h2 style="margin:0">${esc(s.title)} ${chip(s.status)}</h2><div class="mut">${esc(s.channel)} &middot; by ${esc(s.author)} &middot; Purpose: ${esc(s.purpose)}</div></div>
+  <div><label style="margin:0">Version</label><select onchange="location.hash='#/s/${id}/v'+this.value">${d.versions.map(x=>`<option value="${x.n}" ${x.n===v.n?'selected':''}>v${x.n} - ${esc(x.note)}</option>`).join('')}</select></div></div>
+  ${!latest?`<p class="warn">You are viewing an older version (read only). <a href="#/s/${id}">Go to latest</a></p>`:''}<p style="margin:10px 0 0">${actions}</p>
+  <p class="mut">Review of v${v.n}: ${open} open, ${d.findings.length} total. ${esc(v.ai_status||'')}</p></div>
+ <div class="grid"><div><div class="card"><h3>Content (v${v.n})</h3><div class="doc">${hiliteText(v.text,d.findings)}</div>${v.colors?`<p class="mut">Design colours: ${esc(v.colors)}</p>`:''}
+ <p class="mut">Highlighted text = flagged. Click it to jump to the explanation.</p></div>
+ <div class="card"><h3>Comments</h3>${d.comments.map(c=>`<div style="margin-bottom:8px"><b>${esc(c.name)}</b> <span class="chip">${esc(c.role)}</span> <span class="mut">${esc(c.created_at)}</span><div>${esc(c.body)}</div></div>`).join('')||'<p class="mut">No comments yet.</p>'}
+ <div class="row"><input id="cm" placeholder="Add a comment" aria-label="Add a comment"><button style="flex:0" onclick="addComment()">Post</button></div></div>
+ <div class="card"><h3>History and audit log</h3><div class="tabs"><button class="alt sm" onclick="showDiff()">Compare with previous version</button></div><div id="diff"></div>
+ <table>${d.audit.map(a=>`<tr><td class="mut" style="width:130px">${esc(a.created_at)}</td><td><b>${esc(a.name||'system')}</b> ${esc(a.action)}<div class="mut">${esc(a.detail)}</div></td></tr>`).join('')}</table></div></div>
+ <div><h3>Findings (${d.findings.length})</h3>${d.findings.map(f=>findingCard(f,canAct)).join('')||'<div class="card ok">No issues found against the approved guidelines.</div>'}
+ <p class="mut">AI and rules only suggest. Nothing changes until you accept, edit or dismiss it, and a human approves the final content.</p></div></div>`}
+async function decide(id,dec,x){try{await api('/findings/'+id+'/decide',{method:'POST',body:{decision:dec,...x}});render()}catch(e){toast(e.message,1)}}
+async function decideEdit(id,sug){const v=await ask('Your replacement text','<input id="ev" aria-label="Replacement text" value="'+esc(sug)+'">',()=>$('#ev').value);if(v===null)return;decide(id,'edit',{edited_text:v})}
+async function decideDismiss(id){const v=await ask('Why are you dismissing this finding?','<input id="ev" placeholder="Short reason (kept in the audit log)" aria-label="Reason">',()=>$('#ev').value);if(v===null)return;decide(id,'dismiss',{reason:v})}
+async function doApply(){try{const r=await api('/submissions/'+CUR.submission.id+'/apply',{method:'POST'});await render();toast('Created v'+r.version+' with '+r.applied+' change(s) and re-ran the review')}catch(e){toast(e.message,1)}}
+async function doEdit(){const v=await ask('Edit text (a new version is created and re-reviewed)','<textarea id="ev" style="min-height:220px">'+esc(CUR.version.text)+'</textarea>',()=>$('#ev').value);if(v===null)return;try{await api('/submissions/'+CUR.submission.id+'/version',{method:'POST',body:{text:v,colors:CUR.version.colors||'',note:'Edited by author'}});await render();toast('New version created and re-reviewed')}catch(e){toast(e.message,1)}}
+async function doSubmit(){try{await api('/submissions/'+CUR.submission.id+'/status',{method:'POST',body:{action:'submit'}});render()}catch(e){toast(e.message,1)}}
+async function doDecision(a){const c=await ask(a==='approve'?'Approve this content':'Request changes','<input id="ev" placeholder="'+(a==='approve'?'Optional comment':'What must change? (required)')+'" aria-label="Comment">',()=>$('#ev').value);if(c===null)return;try{await api('/submissions/'+CUR.submission.id+'/status',{method:'POST',body:{action:a,comment:c}});render()}catch(e){toast(e.message,1)}}
+async function addComment(){const b=$('#cm').value;try{await api('/submissions/'+CUR.submission.id+'/comments',{method:'POST',body:{body:b}});render()}catch(e){toast(e.message,1)}}
+async function showDiff(){const n=CUR.version.n;if(n<2){$('#diff').innerHTML='<p class="mut">This is the first version.</p>';return}const r=await api(`/submissions/${CUR.submission.id}/diff?a=${n-1}&b=${n}`);$('#diff').innerHTML='<div class="doc" style="max-height:220px;margin:8px 0">'+r.ops.map(o=>o.op==='equal'?esc(o.text):o.op==='delete'?'<del>'+esc(o.text)+'</del>':'<ins>'+esc(o.text)+'</ins>').join('')+'</div>'}
+async function viewKB(el){const k=await api('/kb');const mgr=S.user.role==='manager';const rm=(t,i)=>mgr?`<button class="alt sm" onclick="rmKB('${t}','${i}')">Remove</button>`:'';
+ el.innerHTML=`<div id="toast"></div><div class="card"><h2>Brand knowledge: BrightBox</h2><p class="mut">This is the approved source material every finding is checked against and cites. ${mgr?'You can edit it.':'Only a brand manager can edit it.'}</p></div>
+ <div class="card"><h3>Guidelines</h3><table><tr><th>Ref</th><th>Category</th><th>Rule</th><th>Type</th><th></th></tr>${k.clauses.map(c=>`<tr><td>${esc(c.ref)}</td><td>${esc(c.category)}</td><td><b>${esc(c.title)}</b><div class="mut">${esc(c.text)}</div></td><td>${c.check_type==='text'?'<span class="mut">Reference text (used by AI layer)</span>':'<span class="chip">Automatic check</span>'}</td><td>${c.check_type==='text'?rm('clause',c.ref):''}</td></tr>`).join('')}</table>
+ ${mgr?`<label>Import guidelines (paste text; each paragraph becomes a clause) or upload a file</label><textarea id="imp" style="min-height:80px"></textarea><p><input type="file" id="impf" accept=".txt,.md,.docx,.pdf" style="width:auto"> <button onclick="doImport()">Import</button></p>`:''}</div>
+ <div class="card"><h3>Terminology</h3><table><tr><th>Avoid</th><th>Use</th><th></th></tr>${k.terms.map(t=>`<tr><td>${esc(t.banned)}</td><td>${esc(t.preferred)}</td><td>${rm('term',t.id)}</td></tr>`).join('')}</table>
+ ${mgr?`<div class="row"><input id="tb" placeholder="Term to avoid"><input id="tp" placeholder="Approved term"><button style="flex:0" onclick="addTerm()">Add</button></div>`:''}</div>
+ <div class="card"><h3>Approved facts and claims</h3><table><tr><th>Ref</th><th>What</th><th>Approved value</th><th>Source</th><th></th></tr>${k.facts.map(f=>`<tr><td>${esc(f.ref)}</td><td>${esc(f.label)}<div class="mut">${f.kind==='claim'?'approved claim':'keywords: '+esc(JSON.parse(f.keywords||'[]').join(', '))}</div></td><td>${esc(f.value)}</td><td>${esc(f.source)}</td><td>${rm('fact',f.id)}</td></tr>`).join('')}</table>
+ ${mgr?`<div class="row"><input id="fl" placeholder="Label e.g. Premium box price"><input id="fk" placeholder="Keywords (comma separated)"><input id="fv" placeholder="Approved value e.g. \u20b9899"><input id="fs" placeholder="Source document"><select id="fy"><option value="fact">Fact (number check)</option><option value="claim">Approved claim</option></select><button style="flex:0" onclick="addFact()">Add</button></div>`:''}</div>`;
+ const f=$('#impf');if(f)f.onchange=async e=>{const fd=new FormData();fd.append('file',e.target.files[0]);try{$('#imp').value=(await api('/extract',{method:'POST',form:fd})).text}catch(err){toast(err.message,1)}}}
+async function rmKB(t,i){await api(`/kb/${t}/${i}`,{method:'DELETE'});render()}
+async function addTerm(){try{await api('/kb/term',{method:'POST',body:{banned:$('#tb').value,preferred:$('#tp').value}});render()}catch(e){toast(e.message,1)}}
+async function addFact(){try{await api('/kb/fact',{method:'POST',body:{label:$('#fl').value,keywords:$('#fk').value,value:$('#fv').value,source:$('#fs').value,kind:$('#fy').value}});render()}catch(e){toast(e.message,1)}}
+async function doImport(){try{const r=await api('/kb/import',{method:'POST',body:{text:$('#imp').value}});await render();toast('Imported '+r.imported+' clause(s)')}catch(e){toast(e.message,1)}}
+async function viewInsights(el){const d=await api('/insights');const mx=Math.max(1,...d.rules.map(r=>r.total));
+ const un=d.rules.filter(r=>r.unclear);
+ el.innerHTML=`<div class="card"><h2>Governance insights</h2><p class="mut">Which rules are broken most, and which guidelines may be unclear.</p>
+ ${un.length?un.map(r=>`<div class="warn" style="display:block;margin-bottom:6px;padding:8px"><b>Guideline may be unclear: ${esc(r.ref)} &middot; ${esc(r.title)}</b> &mdash; authors dismissed ${Math.round(r.dismiss_rate*100)}% of its findings${r.reasons.length?' (reasons given: '+r.reasons.map(esc).join('; ')+')':''}. Consider clarifying when this rule applies.</div>`).join(''):'<p class="mut">No unclear guidelines detected yet.</p>'}</div>
+ <div class="card"><h3>Most repeated issues</h3><table><tr><th>Rule</th><th>Category</th><th style="width:30%">Findings</th><th>Accepted</th><th>Dismissed</th><th>Open</th></tr>${d.rules.map(r=>`<tr><td><b>${esc(r.ref)}</b><div class="mut">${esc(r.title)}</div></td><td>${esc(r.category)}</td><td><div class="bar" style="width:${Math.round(r.total/mx*100)}%"></div> ${r.total}</td><td>${r.accepted||0}</td><td>${r.dismissed||0}</td><td>${r.open||0}</td></tr>`).join('')}</table></div>
+ <div class="row"><div class="card"><h3>Findings by category</h3><table>${d.categories.map(c=>`<tr><td>${esc(c.category)}</td><td>${c.n}</td></tr>`).join('')}</table></div>
+ <div class="card"><h3>Findings by author</h3><table>${d.authors.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.n}</td></tr>`).join('')}</table></div>
+ <div class="card"><h3>Content by status</h3><table>${d.statuses.map(c=>`<tr><td>${esc(c.status)}</td><td>${c.n}</td></tr>`).join('')}</table></div></div>`}
+boot();
+</script></body></html>
