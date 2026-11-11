@@ -83,7 +83,7 @@ Code map: `app/main.py` (API, workflow, workspace scoping) - `app/engine.py` (te
 ## Disclosure
 - Optional external service: Anthropic Claude API, only if an administrator sets a key. Not enabled in the live demo. Personal data is redacted before sending, and AI findings are labelled and citation-verified.
 - Libraries (open source): FastAPI, Uvicorn, Pydantic, python-multipart, python-docx, pypdf, Pillow, NumPy, psycopg2.
-- Development: the code was drafted with the help of an AI assistant (Claude), then reviewed, tested and deployed by the participant. No templates or boilerplate repositories were used. The demo brands (BrightBox, Northwind Bank) and all sample content are fictional.
+- Development: the code was drafted with the help of an AI assistant (Claude), then reviewed, tested and deployed by me . No templates or boilerplate repositories were used. The demo brands (BrightBox, Northwind Bank) and all sample content are fictional.
 
 ## Known limitations
 - Text rules are English-oriented and pattern based. They miss paraphrases (e.g. "twenty percent"), cannot tell idioms from claims ("Best of luck"), and do not check comparisons with competitors. The stress set documents these cases.
