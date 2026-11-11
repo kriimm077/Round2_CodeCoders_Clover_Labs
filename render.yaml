@@ -5,10 +5,13 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
-      - key: ANTHROPIC_API_KEY
+      - key: DATABASE_URL        # paste the Internal Database URL of a Render PostgreSQL here (optional; SQLite is used if empty)
+        sync: false
+      - key: ANTHROPIC_API_KEY   # optional: enables the AI layer
         sync: false
       - key: CLAUDE_MODEL
         value: claude-sonnet-5-5

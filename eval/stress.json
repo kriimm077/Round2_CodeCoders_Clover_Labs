@@ -1,0 +1,154 @@
+[
+ {
+  "id": "stress-01",
+  "channel": "Email",
+  "text": "Best of luck with your exams.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "stress-02",
+  "channel": "Website",
+  "text": "The greatest snack box ever made.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "greatest"
+   ]
+  ]
+ },
+ {
+  "id": "stress-03",
+  "channel": "Website",
+  "text": "Our Starter box is just Rs. 599 a month.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "Rs. 599"
+   ]
+  ]
+ },
+ {
+  "id": "stress-04",
+  "channel": "Website",
+  "text": "Our annual plan saves twenty percent.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "twenty percent"
+   ]
+  ]
+ },
+ {
+  "id": "stress-05",
+  "channel": "Website",
+  "text": "The Starter box costs ₹ 599 per month.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "₹ 599"
+   ]
+  ]
+ },
+ {
+  "id": "stress-06",
+  "channel": "Website",
+  "text": "Our customer-first approach.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "customer"
+   ]
+  ]
+ },
+ {
+  "id": "stress-07",
+  "channel": "Website",
+  "text": "UNICEF supports children worldwide.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "stress-08",
+  "channel": "Website",
+  "text": "We offer a risk free trial.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "risk free"
+   ]
+  ]
+ },
+ {
+  "id": "stress-09",
+  "channel": "Website",
+  "text": "No. 1 in snack boxes.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "No. 1"
+   ]
+  ]
+ },
+ {
+  "id": "stress-10",
+  "channel": "Website",
+  "text": "Order now!!! Limited stock!!!",
+  "colors": "",
+  "expect": [
+   [
+    "exclaim",
+    "!!!"
+   ],
+   [
+    "exclaim",
+    "!!!"
+   ]
+  ]
+ },
+ {
+  "id": "stress-11",
+  "channel": "Email",
+  "text": "Contact us at +91 98765 43210.",
+  "colors": "",
+  "expect": [
+   [
+    "pii",
+    "+91 98765 43210"
+   ]
+  ]
+ },
+ {
+  "id": "stress-12",
+  "channel": "Website",
+  "text": "The Family plan costs ₹899, while the Starter box costs ₹499.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "stress-13",
+  "channel": "Website",
+  "text": "Rated 4.5 stars by 1,200 members.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "stress-14",
+  "channel": "Website",
+  "text": "Our snacks are better than Brand X.",
+  "colors": "",
+  "expect": [
+   [
+    "messaging",
+    "Brand X"
+   ]
+  ]
+ }
+]

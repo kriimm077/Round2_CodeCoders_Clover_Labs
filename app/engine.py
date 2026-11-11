@@ -1,9 +1,18 @@
 """Review engine: deterministic rule checks + optional AI layer with citation verification.
 Every finding carries the approved source (clause / fact) that justifies it."""
 import re, json, os, urllib.request
+from . import privacy
 
 def _span_sentences(text):
-    return [(m.start(), m.end()) for m in re.finditer(r"[^.!?\n]+(?:[.!?]+|$)", text) if m.group().strip()]
+    """Sentence spans. A full stop only ends a sentence when followed by a capital letter / quote / end of line, so 'Rs. 599' and 'No. 1' stay intact."""
+    spans = []
+    for line in re.finditer(r"[^\n]+", text):
+        ls, seg, start = line.start(), line.group(), 0
+        for m in re.finditer(r"[.!?]+(?=\s+[A-Z\"'\[(]|\s*$)", seg):
+            spans.append((ls + start, ls + m.end())); start = m.end()
+        if start < len(seg) and seg[start:].strip():
+            spans.append((ls + start, ls + len(seg)))
+    return [(s, e) for s, e in spans if text[s:e].strip()]
 
 def _sentence_at(text, pos):
     for s, e in _span_sentences(text):
@@ -42,23 +51,35 @@ def _dist(a, b):
     return sum((int(a[i:i + 2], 16) - int(b[i:i + 2], 16)) ** 2 for i in (0, 2, 4))
 
 HEX_RE = re.compile(r"#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\b")
-CLAIM_RE = re.compile(r"(?<!\w)(world['\u2019]?s (?:best|leading|first|finest)|clinically proven|risk[- ]free|number one|#1|best|guarantee[ds]?|100%\s?|unbeatable|miracle|cures?)(?!\w)", re.I)
-SOFTEN = {"best": "great", "#1": "trusted", "number one": "trusted", "guarantee": "aim to deliver", "guaranteed": "designed to deliver", "guarantees": "aims to deliver",
+CLAIM_RE = re.compile(r"(?<!\w)(world['\u2019]?s (?:best|leading|first|finest)|clinically proven|risk[- ]free|number one|no\.\s?1|#1|best|greatest|guarantee[ds]?|100%\s?|unbeatable|miracle|cures?)(?!\w)", re.I)
+SOFTEN = {"best": "great", "greatest": "great", "no. 1": "trusted", "no.1": "trusted", "#1": "trusted", "number one": "trusted", "guarantee": "aim to deliver", "guaranteed": "designed to deliver", "guarantees": "aims to deliver",
           "100%": "", "clinically proven": "carefully developed", "risk-free": "low-commitment", "risk free": "low-commitment", "unbeatable": "competitive",
           "miracle": "helpful", "cure": "help with", "cures": "helps with"}
-NUM_RE = re.compile(r"[\u20b9$\u20ac]\s?\d[\d,]*(?:\.\d+)?|\d[\d,]*(?:\.\d+)?\s?%|\d[\d,]*(?:\.\d+)?")
+_N = r"(?:\d{1,3}(?:,\d{2,3})+|\d+)(?:\.\d+)?"
+NUM_RE = re.compile(r"(?:[\u20b9$\u20ac]|Rs\.?|INR)\s?" + _N + "|" + _N + r"\s?%|" + _N)
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF\u2600-\u27BF]+")
 
 def _kind(tok):
-    return "cur" if tok[0] in "\u20b9$\u20ac" else ("pct" if tok.endswith("%") else "num")
+    return "cur" if (tok[0] in "\u20b9$\u20ac" or tok.lower().startswith(("rs", "inr"))) else ("pct" if tok.endswith("%") else "num")
 
 def _norm(tok):
-    return re.sub(r"[^\d.]", "", tok)
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", tok)
+    return m.group().replace(",", "") if m else ""
 
-def run_rules(text, colors, kb):
-    cl = {c["check_type"]: c for c in kb["clauses"] if c["check_type"] != "text"}
+def _active(c, channel):
+    try:
+        return channel not in (json.loads(c["params"] or "{}").get("exempt_channels") or [])
+    except Exception:
+        return True
+
+PROTECT_RE = re.compile(r"\S+@\S+|https?://\S+|www\.\S+")
+
+def run_rules(text, colors, kb, channel=""):
+    cl = {c["check_type"]: c for c in kb["clauses"] if c["check_type"] != "text" and _active(c, channel)}
     P = lambda k: json.loads(cl[k]["params"] or "{}") if k in cl else {}
     out = []
+    protected = [(m.start(), m.end()) for m in PROTECT_RE.finditer(text)]
+    inside = lambda a, b: any(a >= ps and b <= pe for ps, pe in protected)  # emails and URLs are not prose
 
     def add(rule, src, sev, s, e, expl, sugg, conf, cat=None):
         out.append(dict(rule=rule, category=cat or src.get("category", ""), severity=sev, start=s, end=e,
@@ -70,6 +91,8 @@ def run_rules(text, colors, kb):
         c = cl["term"]
         for t in kb["terms"]:
             for m in re.finditer(r"(?<!\w)" + re.escape(t["banned"]) + r"(?!\w)", text, re.I):
+                if inside(m.start(), m.end()) or m.group() == t["preferred"]:
+                    continue  # emails/URLs are not prose; the approved spelling itself is correct
                 rep = match_case(m.group(), t["preferred"])
                 add("term", c, c["severity"], m.start(), m.end(), f"\u201c{m.group()}\u201d is not approved BrightBox terminology. Use \u201c{rep}\u201d instead.", rep, 0.95)
     # 2. unsupported claims
@@ -113,18 +136,27 @@ def run_rules(text, colors, kb):
                 add("exclaim", c, c["severity"], m.start(), m.end(), f"Too many exclamation marks. The voice guideline allows at most {mx}, and one at a time.", ".", 0.9)
     if "caps" in cl:
         c = cl["caps"]; allow = set(P("caps").get("allow", []))
-        for m in re.finditer(r"\b[A-Z]{4,}\b", text):
-            if m.group() not in allow:
+        for m in re.finditer(r"\b[A-Z]{3,}\b", text):
+            if m.group() not in allow and not inside(m.start(), m.end()):
                 add("caps", c, c["severity"], m.start(), m.end(), f"\u201c{m.group()}\u201d is written in capitals, which reads as shouting.", m.group().capitalize(), 0.9)
     if "slang" in cl:
         c = cl["slang"]
         for w, rep in P("slang").get("map", {}).items():
             for m in re.finditer(r"(?<!\w)" + re.escape(w) + r"(?!\w)", text, re.I):
+                if inside(m.start(), m.end()):
+                    continue
                 add("slang", c, c["severity"], m.start(), m.end(), f"\u201c{m.group()}\u201d is informal. Prefer plain, professional wording.", match_case(m.group(), rep), 0.85)
     if "emoji" in cl:
         c = cl["emoji"]
         for m in EMOJI_RE.finditer(text):
             add("emoji", c, c["severity"], m.start(), m.end(), "Emoji are not part of the brand voice guideline.", "", 0.9)
+    if "pii" in cl:
+        c = cl["pii"]; allow = [a.lower() for a in P("pii").get("allow", [])]
+        for st, en, kind, val in privacy.find_pii(text):
+            if val.lower() in allow:
+                continue
+            what = {"EMAIL": "email address", "PHONE": "phone number", "CARD": "card-like number", "AADHAAR": "Aadhaar-like number", "PAN": "PAN-like ID"}[kind]
+            add("pii", c, c["severity"], st, en, f"This looks like a personal {what}. Do not publish personal contact or ID details; use the official contact channel.", "our official support channel" if kind in ("EMAIL", "PHONE") else "", 0.85)
     # 5. accessibility
     if "alt" in cl:
         c = cl["alt"]
@@ -169,6 +201,12 @@ def run_rules(text, colors, kb):
     return out
 
 def ai_review(text, purpose, channel, kb, existing):
+    return _ai_review(text, purpose, channel, kb, existing)
+
+def _http_post(req):
+    return json.loads(urllib.request.urlopen(req, timeout=40).read())
+
+def _ai_review(text, purpose, channel, kb, existing):
     """Optional LLM layer. Returns (findings, status). Findings only survive if the cited source exists and the quote is really in the text."""
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
@@ -182,11 +220,13 @@ def ai_review(text, purpose, channel, kb, existing):
               "Look for tone, messaging and claim problems that simple rules could miss. Return ONLY a JSON array (max 6 items), no prose. "
               "Each item: {\"source_ref\": <ref of the guideline or fact involved>, \"quote\": <exact substring of the content>, \"issue\": <one sentence>, "
               "\"suggestion\": <replacement for the quote that keeps the author's purpose>, \"severity\": \"low|medium|high\", \"confidence\": 0-1}. Return [] if nothing is wrong.")
-    user = json.dumps({"purpose": purpose, "channel": channel, "approved_sources": ctx, "content": text})
+    redact_on = os.environ.get("REDACT_BEFORE_AI", "1") != "0"
+    sent, mapping = privacy.redact(text) if redact_on else (text, {})
+    user = json.dumps({"purpose": purpose, "channel": channel, "approved_sources": ctx, "content": sent})
     body = json.dumps({"model": model, "max_tokens": 1500, "system": system, "messages": [{"role": "user", "content": user}]}).encode()
     try:
         req = urllib.request.Request("https://api.anthropic.com/v1/messages", body, {"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"})
-        data = json.loads(urllib.request.urlopen(req, timeout=40).read())
+        data = _http_post(req)
         raw = "".join(b.get("text", "") for b in data.get("content", []))
         raw = raw.strip().strip("`")
         raw = raw[raw.find("["): raw.rfind("]") + 1]
@@ -199,7 +239,7 @@ def ai_review(text, purpose, channel, kb, existing):
     out, dropped = [], 0
     for it in items if isinstance(items, list) else []:
         try:
-            src = allsrc.get(it["source_ref"]); q = it["quote"]; i = text.find(q)
+            src = allsrc.get(it["source_ref"]); q = privacy.restore(it["quote"], mapping); it["suggestion"] = privacy.restore(str(it.get("suggestion", "")), mapping); i = text.find(q)
             if not src or not q or i < 0:
                 dropped += 1; continue
             if any(i < e["end"] and i + len(q) > e["start"] >= 0 for e in existing + out if e["start"] >= 0):
@@ -210,10 +250,10 @@ def ai_review(text, purpose, channel, kb, existing):
                             confidence=min(0.75, float(it.get("confidence", 0.6))), suggestion=str(it.get("suggestion", "")), origin="ai"))
         except Exception:
             dropped += 1
-    return out, f"AI layer used ({model}); {len(out)} verified finding(s), {dropped} discarded because the citation or quote could not be verified"
+    return out, f"AI layer used ({model}); {len(out)} verified finding(s), {dropped} discarded because the citation or quote could not be verified" + ("; personal data was redacted before sending" if redact_on else "")
 
 def review(text, colors, purpose, channel, kb):
-    found = run_rules(text, colors, kb)
+    found = run_rules(text, colors, kb, channel)
     ai, status = ai_review(text, purpose, channel, kb, found)
     allf = found + ai
     allf.sort(key=lambda f: (f["start"] if f["start"] >= 0 else 10 ** 9, f["end"]))

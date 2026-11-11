@@ -1,0 +1,718 @@
+[
+ {
+  "id": "term-01",
+  "channel": "Email",
+  "text": "Our customers love the new box.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "customers"
+   ]
+  ]
+ },
+ {
+  "id": "term-02",
+  "channel": "Email",
+  "text": "Every customer gets a free gift.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "customer"
+   ]
+  ]
+ },
+ {
+  "id": "term-03",
+  "channel": "Website",
+  "text": "Join Bright Box today.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "Bright Box"
+   ]
+  ]
+ },
+ {
+  "id": "term-04",
+  "channel": "Website",
+  "text": "Try our snack pack this month.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "snack pack"
+   ]
+  ]
+ },
+ {
+  "id": "term-05",
+  "channel": "Website",
+  "text": "A cheap and tasty treat.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "cheap"
+   ]
+  ]
+ },
+ {
+  "id": "term-06",
+  "channel": "Website",
+  "text": "Our members love BrightBox snacks.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "term-07",
+  "channel": "Website",
+  "text": "We never sell junk food, only healthy snacks.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "junk food"
+   ]
+  ]
+ },
+ {
+  "id": "term-08",
+  "channel": "Website",
+  "text": "Visit www.brightbox.in for details.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "term-09",
+  "channel": "Website",
+  "text": "Welcome to Brightbox.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "Brightbox"
+   ]
+  ]
+ },
+ {
+  "id": "term-10",
+  "channel": "Email",
+  "text": "Customers' choice award winner.",
+  "colors": "",
+  "expect": [
+   [
+    "term",
+    "Customers"
+   ]
+  ]
+ },
+ {
+  "id": "claim-01",
+  "channel": "Website",
+  "text": "The best snacks in town.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "best"
+   ]
+  ]
+ },
+ {
+  "id": "claim-02",
+  "channel": "Website",
+  "text": "Guaranteed to make you smile.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "Guaranteed"
+   ]
+  ]
+ },
+ {
+  "id": "claim-03",
+  "channel": "Website",
+  "text": "We guarantee fresh delivery.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "guarantee"
+   ]
+  ]
+ },
+ {
+  "id": "claim-04",
+  "channel": "Website",
+  "text": "Made with 100% natural ingredients.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "claim-05",
+  "channel": "Website",
+  "text": "Clinically proven to boost energy.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "Clinically proven"
+   ]
+  ]
+ },
+ {
+  "id": "claim-06",
+  "channel": "Website",
+  "text": "A risk-free trial for a month.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "risk-free"
+   ]
+  ]
+ },
+ {
+  "id": "claim-07",
+  "channel": "Website",
+  "text": "This number one snack box is loved.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "number one"
+   ]
+  ]
+ },
+ {
+  "id": "claim-08",
+  "channel": "Website",
+  "text": "Rated #1 by members.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "#1"
+   ]
+  ]
+ },
+ {
+  "id": "claim-09",
+  "channel": "Website",
+  "text": "We will bestow a small gift on you.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "claim-10",
+  "channel": "Website",
+  "text": "A 100% sugar free promise.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "100%"
+   ]
+  ]
+ },
+ {
+  "id": "claim-11",
+  "channel": "Website",
+  "text": "Contains no added sugar and is healthy.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "claim-12",
+  "channel": "Website",
+  "text": "It cures hunger fast.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "cures"
+   ]
+  ]
+ },
+ {
+  "id": "claim-13",
+  "channel": "Website",
+  "text": "We guarantee results, made with 100% natural ingredients.",
+  "colors": "",
+  "expect": [
+   [
+    "claim",
+    "guarantee"
+   ]
+  ]
+ },
+ {
+  "id": "fact-01",
+  "channel": "Website",
+  "text": "The Starter box costs ₹599 a month.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "₹599"
+   ]
+  ]
+ },
+ {
+  "id": "fact-02",
+  "channel": "Website",
+  "text": "The Starter box costs ₹499 a month.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-03",
+  "channel": "Website",
+  "text": "Free delivery on orders above ₹999.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "₹999"
+   ]
+  ]
+ },
+ {
+  "id": "fact-04",
+  "channel": "Website",
+  "text": "Free delivery on orders above ₹799.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-05",
+  "channel": "Website",
+  "text": "Our annual plan saves 20% every year.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "20%"
+   ]
+  ]
+ },
+ {
+  "id": "fact-06",
+  "channel": "Website",
+  "text": "Our annual plan saves 15% every year.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-07",
+  "channel": "Website",
+  "text": "Founded in 2019, we deliver snacks.",
+  "colors": "",
+  "expect": [
+   [
+    "fact",
+    "2019"
+   ]
+  ]
+ },
+ {
+  "id": "fact-08",
+  "channel": "Website",
+  "text": "BrightBox was founded in 2021.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-09",
+  "channel": "Website",
+  "text": "The Starter box has 12 snacks for ₹499.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-10",
+  "channel": "Website",
+  "text": "We deliver in 3 to 5 days. The Starter box includes 10 snacks.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "fact-11",
+  "channel": "Website",
+  "text": "Free delivery, always.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "tone-01",
+  "channel": "Website",
+  "text": "Welcome to the family! Enjoy your box.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "tone-02",
+  "channel": "Website",
+  "text": "Wow! Amazing! Great!",
+  "colors": "",
+  "expect": [
+   [
+    "exclaim",
+    "!"
+   ],
+   [
+    "exclaim",
+    "!"
+   ]
+  ]
+ },
+ {
+  "id": "tone-03",
+  "channel": "Website",
+  "text": "Big news!!",
+  "colors": "",
+  "expect": [
+   [
+    "exclaim",
+    "!!"
+   ]
+  ]
+ },
+ {
+  "id": "tone-04",
+  "channel": "Website",
+  "text": "Order NOW and save.",
+  "colors": "",
+  "expect": [
+   [
+    "caps",
+    "NOW"
+   ]
+  ]
+ },
+ {
+  "id": "tone-05",
+  "channel": "Website",
+  "text": "Get FRESH snacks delivered.",
+  "colors": "",
+  "expect": [
+   [
+    "caps",
+    "FRESH"
+   ]
+  ]
+ },
+ {
+  "id": "tone-06",
+  "channel": "Website",
+  "text": "Read our FAQ and PDF guide.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "tone-07",
+  "channel": "Website",
+  "text": "Hey guys, we are gonna love this.",
+  "colors": "",
+  "expect": [
+   [
+    "slang",
+    "guys"
+   ],
+   [
+    "slang",
+    "gonna"
+   ]
+  ]
+ },
+ {
+  "id": "tone-08",
+  "channel": "Website",
+  "text": "That was awesome lol",
+  "colors": "",
+  "expect": [
+   [
+    "slang",
+    "awesome"
+   ],
+   [
+    "slang",
+    "lol"
+   ]
+  ]
+ },
+ {
+  "id": "tone-09",
+  "channel": "Website",
+  "text": "Super tasty stuff inside.",
+  "colors": "",
+  "expect": [
+   [
+    "slang",
+    "Super"
+   ],
+   [
+    "slang",
+    "stuff"
+   ]
+  ]
+ },
+ {
+  "id": "tone-10",
+  "channel": "Website",
+  "text": "A tasty, healthy box 🎉",
+  "colors": "",
+  "expect": [
+   [
+    "emoji",
+    "🎉"
+   ]
+  ]
+ },
+ {
+  "id": "tone-11",
+  "channel": "Website",
+  "text": "Rainy 🌧 days 😋",
+  "colors": "",
+  "expect": [
+   [
+    "emoji",
+    "🌧"
+   ],
+   [
+    "emoji",
+    "😋"
+   ]
+  ]
+ },
+ {
+  "id": "acc-01",
+  "channel": "Website",
+  "text": "See ![](box.png) for details.",
+  "colors": "",
+  "expect": [
+   [
+    "alt",
+    "![](box.png)"
+   ]
+  ]
+ },
+ {
+  "id": "acc-02",
+  "channel": "Website",
+  "text": "See ![A box of snacks](box.png) for details.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "acc-03",
+  "channel": "Website",
+  "text": "Image: <img src=\"a.png\">",
+  "colors": "",
+  "expect": [
+   [
+    "alt",
+    "<img src=\"a.png\">"
+   ]
+  ]
+ },
+ {
+  "id": "acc-04",
+  "channel": "Website",
+  "text": "Image: <img src=\"a.png\" alt=\"Snack box\">",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "acc-05",
+  "channel": "Website",
+  "text": "Click [here](https://x.com) now.",
+  "colors": "",
+  "expect": [
+   [
+    "link",
+    "[here](https://x.com)"
+   ]
+  ]
+ },
+ {
+  "id": "acc-06",
+  "channel": "Website",
+  "text": "Read the [snack guide](https://x.com) now.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "acc-07",
+  "channel": "Website",
+  "text": "Our monthly subscription box brings together a wide range of carefully selected healthy Indian snacks from small producers across the country so that every member can enjoy variety, convenience and honest pricing without ever having to visit a store.",
+  "colors": "",
+  "expect": [
+   [
+    "longsent",
+    "*"
+   ]
+  ]
+ },
+ {
+  "id": "acc-08",
+  "channel": "Website",
+  "text": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "vis-01",
+  "channel": "Website",
+  "text": "Use colour #FF00AA in the banner.",
+  "colors": "",
+  "expect": [
+   [
+    "palette",
+    "#FF00AA"
+   ]
+  ]
+ },
+ {
+  "id": "vis-02",
+  "channel": "Website",
+  "text": "Use colour #1f6f5c in the banner.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "vis-03",
+  "channel": "Website",
+  "text": "Banner text",
+  "colors": "text: #777777, background: #FFFFFF",
+  "expect": [
+   [
+    "palette",
+    ""
+   ],
+   [
+    "contrast",
+    ""
+   ]
+  ]
+ },
+ {
+  "id": "vis-04",
+  "channel": "Website",
+  "text": "Banner text",
+  "colors": "text: #1A1A1A, background: #FFFFFF",
+  "expect": []
+ },
+ {
+  "id": "vis-05",
+  "channel": "Website",
+  "text": "Banner text",
+  "colors": "text: #1F6F5C, background: #F5F1E8",
+  "expect": []
+ },
+ {
+  "id": "vis-06",
+  "channel": "Website",
+  "text": "Banner text",
+  "colors": "text: #F4B942, background: #FFFFFF",
+  "expect": [
+   [
+    "contrast",
+    ""
+   ]
+  ]
+ },
+ {
+  "id": "pii-01",
+  "channel": "Email",
+  "text": "Call 9876543210 for orders.",
+  "colors": "",
+  "expect": [
+   [
+    "pii",
+    "9876543210"
+   ]
+  ]
+ },
+ {
+  "id": "pii-02",
+  "channel": "Email",
+  "text": "Write to riya@gmail.com today.",
+  "colors": "",
+  "expect": [
+   [
+    "pii",
+    "riya@gmail.com"
+   ]
+  ]
+ },
+ {
+  "id": "pii-03",
+  "channel": "Email",
+  "text": "Order id 1234567 is ready.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "pii-04",
+  "channel": "Email",
+  "text": "PAN ABCDE1234F is on file.",
+  "colors": "",
+  "expect": [
+   [
+    "pii",
+    "ABCDE1234F"
+   ]
+  ]
+ },
+ {
+  "id": "mix-01",
+  "channel": "Social media",
+  "text": "Our members enjoy a healthy snack box every month.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "mix-02",
+  "channel": "Social media",
+  "text": "BrightBox delivers healthy snacks. Join today.",
+  "colors": "",
+  "expect": []
+ },
+ {
+  "id": "mix-03",
+  "channel": "Social media",
+  "text": "Hey guys!! Our customers love the best snack pack at ₹599 for the Starter box.",
+  "colors": "",
+  "expect": [
+   [
+    "slang",
+    "guys"
+   ],
+   [
+    "exclaim",
+    "!!"
+   ],
+   [
+    "term",
+    "customers"
+   ],
+   [
+    "claim",
+    "best"
+   ],
+   [
+    "term",
+    "snack pack"
+   ],
+   [
+    "fact",
+    "₹599"
+   ]
+  ]
+ }
+]
