@@ -49,8 +49,8 @@ Open the live link and click a demo role on the login page. Password for every d
 
 ## Run it locally
 ```
-git clone <this repository>
-cd <repository folder>
+git clone https://github.com/kriimm077/Round2_CodeCoders_Clover_Labs.git
+cd Round2_CodeCoders_Clover_Labs
 python -m venv .venv && .venv\Scripts\activate        # Windows  (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
 uvicorn app.main:app --reload
